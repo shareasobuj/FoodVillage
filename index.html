@@ -3,42 +3,40 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FoodVillage.com</title>
+<title>FoodVillage.com - Dynamic</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Arial, sans-serif}
-body{background:#f4f6f9;position:relative}
-
-/* ===== WATERMARK LOGO ===== */
+/* ==== GLOBAL STYLE ==== */
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif;transition:0.3s}
+body{background:#f4f6f9;overflow-x:hidden;position:relative;}
 body::before{
-  content:"";
-  position:fixed;
-  inset:0;
-  background:url('https://via.placeholder.com/600x600?text=FoodVillage+Logo') center/40% no-repeat;
-  opacity:0.08;
-  pointer-events:none;
-  z-index:0;
-}
-
-header{background:#e63946;color:#fff;padding:15px;text-align:center;font-size:24px;font-weight:bold;position:relative;z-index:1}
-.container{padding:20px;position:relative;z-index:1}
-.card{background:#fff;padding:20px;border-radius:12px;box-shadow:0 4px 10px rgba(0,0,0,.08);margin-bottom:20px}
-input,select,button,textarea{width:100%;padding:10px;margin:6px 0;border-radius:8px;border:1px solid #ccc}
-button{background:#e63946;color:#fff;border:none;cursor:pointer;font-weight:bold}
-button:hover{background:#c1121f}
-.flex{display:flex;gap:10px;flex-wrap:wrap}
-.product{border:1px solid #ddd;border-radius:10px;padding:10px;width:220px;position:relative}
-.product img{width:100%;height:120px;object-fit:cover;border-radius:8px;margin-bottom:6px}
-.gallery{display:grid;grid-template-columns:repeat(2,1fr);gap:4px}
-.delBtn{position:absolute;top:6px;right:6px;background:#000;color:#fff;border:none;padding:4px 6px;border-radius:6px;font-size:12px;cursor:pointer}
+content:"";position:fixed;inset:0;background:url('https://via.placeholder.com/600x600?text=FoodVillage+Logo') center/40% no-repeat;opacity:0.05;pointer-events:none;z-index:0;}
+header{background:#e63946;color:#fff;padding:18px;text-align:center;font-size:28px;font-weight:bold;position:relative;z-index:1;box-shadow:0 3px 6px rgba(0,0,0,.1)}
+nav{background:#222;color:#fff;padding:10px;text-align:center;position:sticky;top:0;z-index:10;box-shadow:0 2px 5px rgba(0,0,0,.1)}
+nav button{width:auto;margin:5px;padding:8px 14px;border:none;border-radius:6px;background:#e63946;color:#fff;font-weight:bold;cursor:pointer;transition:0.3s}
+nav button:hover{background:#c1121f}
+.container{padding:20px;position:relative;z-index:1;max-width:1200px;margin:auto}
+.card{background:#fff;padding:20px;border-radius:12px;box-shadow:0 6px 15px rgba(0,0,0,.1);margin-bottom:20px;opacity:0;transform:translateY(20px);animation:fadeInUp 0.6s forwards;}
+@keyframes fadeInUp{to{opacity:1;transform:translateY(0)}}
+input,select,textarea,button{width:100%;padding:10px;margin:6px 0;border-radius:8px;border:1px solid #ccc}
+button{cursor:pointer}
+.flex{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-start}
+.product{border:1px solid #ddd;border-radius:10px;padding:10px;width:220px;position:relative;margin-bottom:15px;transition:0.3s;cursor:pointer;box-shadow:0 3px 6px rgba(0,0,0,.05)}
+.product:hover{transform:translateY(-5px);box-shadow:0 6px 15px rgba(0,0,0,.15)}
+.gallery{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px}
+.gallery img{width:60px;height:60px;object-fit:cover;border-radius:6px}
+.delBtn,.editBtn{position:absolute;top:6px;background:#000;color:#fff;border:none;padding:4px 6px;border-radius:6px;font-size:12px;cursor:pointer}
+.delBtn{right:6px}
+.editBtn{right:50px;background:orange}
 .hidden{display:none}
-nav{background:#222;color:#fff;padding:10px;text-align:center}
-nav button{width:auto;margin:5px}
-.preview{width:70px;height:55px;object-fit:cover;border-radius:6px;border:1px solid #ccc;margin:3px}
-.previewBox{display:flex;flex-wrap:wrap}
+.preview{width:70px;height:55px;object-fit:cover;border-radius:6px;border:1px solid #ccc;margin:3px;transition:0.3s}
+.preview:hover{transform:scale(1.2)}
+.previewBox{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px}
+#searchProduct{margin-bottom:12px;padding:8px;border:1px solid #ccc;border-radius:6px}
 @media(max-width:768px){.product{width:100%}}
 </style>
 </head>
 <body>
+
 <header>🍽️ FoodVillage.com</header>
 
 <!-- LOGIN -->
@@ -61,22 +59,24 @@ nav button{width:auto;margin:5px}
 <div id="dashboard" class="hidden">
 <nav>
 <button onclick="showSection('menuSection')">🍔 Menu</button>
-<button onclick="showSection('orderSection')">🛒 Order</button>
+<button onclick="showSection('orderSection')">🛒 Orders</button>
 <button onclick="showSection('adminSection')">⚙️ Admin</button>
 <button onclick="printData()">🖨️ Print</button>
 <button onclick="logout()">🚪 Logout</button>
 </nav>
+
 <div class="container">
 
 <!-- MENU -->
 <div id="menuSection" class="card">
 <h3>📋 Food Menu</h3>
+<input type="text" id="searchProduct" placeholder="Search Product" oninput="renderProducts()">
 <div id="productList" class="flex"></div>
 </div>
 
 <!-- ORDER -->
 <div id="orderSection" class="card hidden">
-<h3>💳 Place Order</h3>
+<h3>💳 Orders & Sales Report</h3>
 <input id="custName" placeholder="Customer Name">
 <input id="custPhone" placeholder="Phone">
 <select id="payment">
@@ -86,14 +86,18 @@ nav button{width:auto;margin:5px}
 </select>
 <textarea id="address" placeholder="Delivery Address"></textarea>
 <button onclick="placeOrder()">✅ Confirm Order</button>
+<h4>📦 Order History</h4>
 <div id="orderHistory"></div>
+<h4>💰 Sales Report</h4>
+<div id="salesReport"></div>
 </div>
 
 <!-- ADMIN -->
 <div id="adminSection" class="card hidden">
-<h3>⚙️ Admin Panel (Multiple Image Upload)</h3>
+<h3>⚙️ Admin Panel (Add/Edit/Delete Products)</h3>
 <input id="pname" placeholder="Food Name">
 <input id="pprice" placeholder="Price">
+<input id="pstock" placeholder="Stock Quantity" type="number">
 <input type="file" id="pimg" accept="image/*" multiple onchange="previewImage()">
 <div id="previewBox" class="previewBox"></div>
 <button onclick="addProduct()">➕ Add Product</button>
@@ -102,80 +106,75 @@ nav button{width:auto;margin:5px}
 <!-- LOCATION -->
 <div class="card">
 <h3>📍 Restaurant Location</h3>
-<iframe src="https://maps.google.com/maps?q=Dhaka&t=&z=13&ie=UTF8&iwloc=&output=embed" width="100%" height="250"></iframe>
+<iframe src="https://maps.google.com/maps?q=Kaliganj%20Dhaka&output=embed" width="100%" height="250"></iframe>
 </div>
 
 </div>
 </div>
 
 <script>
-let users = JSON.parse(localStorage.getItem('fv_users')||'[]');
-let products = JSON.parse(localStorage.getItem('fv_products')||'[]');
-let orders = JSON.parse(localStorage.getItem('fv_orders')||'[]');
-let currentUser = JSON.parse(localStorage.getItem('fv_currentUser')||'null');
+// ===== STORAGE =====
+let users=JSON.parse(localStorage.getItem('fv_users')||'[]');
+let products=JSON.parse(localStorage.getItem('fv_products')||'[]');
+let orders=JSON.parse(localStorage.getItem('fv_orders')||'[]');
+let currentUser=JSON.parse(localStorage.getItem('fv_currentUser')||'null');
 
-window.onload = function(){
-  if(currentUser){
-    document.getElementById('authSection').classList.add('hidden');
-    document.getElementById('dashboard').classList.remove('hidden');
-    if(currentUser.role!=='admin') document.getElementById('adminSection').style.display='none';
-    renderProducts();
-    renderOrders();
-  }
+// ===== AUTO LOGIN =====
+window.onload=function(){
+if(currentUser){
+document.getElementById('authSection').classList.add('hidden');
+document.getElementById('dashboard').classList.remove('hidden');
+if(currentUser.role!=='admin') document.getElementById('adminSection').style.display='none';
+renderProducts();
+renderOrders();
+}
 }
 
+// ===== AUTH =====
 function signup(){
 const name=nameInput('name');
 const email=nameInput('email');
 const password=nameInput('password');
 const role=document.getElementById('role').value;
-if(!email||!password)return alert('Fill all');
+if(!email||!password){alert('Fill all');return;}
 users.push({name,email,password,role});
 localStorage.setItem('fv_users',JSON.stringify(users));
 alert('Signup success');
 }
-
 function login(){
 const email=nameInput('email');
 const password=nameInput('password');
 const user=users.find(u=>u.email===email&&u.password===password);
-if(!user)return alert('Login failed');
+if(!user){alert('Login failed');return;}
 currentUser=user;
 localStorage.setItem('fv_currentUser',JSON.stringify(user));
-
 document.getElementById('authSection').classList.add('hidden');
 document.getElementById('dashboard').classList.remove('hidden');
 if(user.role!=='admin')document.getElementById('adminSection').style.display='none';
 renderProducts();
 renderOrders();
 }
-
-function logout(){
-localStorage.removeItem('fv_currentUser');
-location.reload();
-}
-
+function logout(){localStorage.removeItem('fv_currentUser');location.reload();}
 function nameInput(id){return document.getElementById(id).value.trim();}
-
 function showSection(id){
 document.querySelectorAll('#menuSection,#orderSection,#adminSection').forEach(s=>s.classList.add('hidden'));
 document.getElementById(id).classList.remove('hidden');
 }
 
-// ===== IMAGE PREVIEW (MULTIPLE) =====
+// ===== IMAGE PREVIEW =====
 function previewImage(){
 const files=document.getElementById('pimg').files;
 const box=document.getElementById('previewBox');
 box.innerHTML='';
 Array.from(files).forEach(file=>{
-  const reader=new FileReader();
-  reader.onload=e=>{
-    const img=document.createElement('img');
-    img.src=e.target.result;
-    img.className='preview';
-    box.appendChild(img);
-  };
-  reader.readAsDataURL(file);
+const reader=new FileReader();
+reader.onload=e=>{
+const img=document.createElement('img');
+img.src=e.target.result;
+img.className='preview';
+box.appendChild(img);
+};
+reader.readAsDataURL(file);
 });
 }
 
@@ -183,25 +182,28 @@ Array.from(files).forEach(file=>{
 function addProduct(){
 const name=nameInput('pname');
 const price=nameInput('pprice');
+const stock=nameInput('pstock');
 const files=document.getElementById('pimg').files;
-if(!name||!price||files.length===0){alert('সব তথ্য দিন');return;}
-
-let images=[];
-let loaded=0;
-
+if(!name||!price||!stock||files.length===0){alert('সব তথ্য দিন');return;}
+let imageArray=[],loaded=0;
 Array.from(files).forEach(file=>{
-  const reader=new FileReader();
-  reader.onload=function(e){
-    images.push(e.target.result);
-    loaded++;
-    if(loaded===files.length){
-      products.push({name,price,imgs:images,date:new Date().toLocaleDateString()});
-      localStorage.setItem('fv_products',JSON.stringify(products));
-      renderProducts();
-      alert('✅ Product added with multiple images');
-    }
-  };
-  reader.readAsDataURL(file);
+const reader=new FileReader();
+reader.onload=function(e){
+imageArray.push(e.target.result);
+loaded++;
+if(loaded===files.length){
+products.push({name,price,stock,images:imageArray,date:new Date().toLocaleDateString()});
+localStorage.setItem('fv_products',JSON.stringify(products));
+renderProducts();
+document.getElementById('pname').value='';
+document.getElementById('pprice').value='';
+document.getElementById('pstock').value='';
+document.getElementById('pimg').value='';
+document.getElementById('previewBox').innerHTML='';
+alert('✅ Product Added');
+}
+};
+reader.readAsDataURL(file);
 });
 }
 
@@ -212,27 +214,42 @@ localStorage.setItem('fv_products',JSON.stringify(products));
 renderProducts();
 }
 
+function editProduct(index){
+const p=products[index];
+document.getElementById('pname').value=p.name;
+document.getElementById('pprice').value=p.price;
+document.getElementById('pstock').value=p.stock;
+document.getElementById('pimg').value='';
+document.getElementById('previewBox').innerHTML='';
+products.splice(index,1);
+localStorage.setItem('fv_products',JSON.stringify(products));
+renderProducts();
+}
+
 function renderProducts(){
 const box=document.getElementById('productList');
+const search=document.getElementById('searchProduct').value.toLowerCase();
 box.innerHTML='';
-products.forEach((p,i)=>{
-  const imgs=(p.imgs||[p.img]).map(src=>`<img src="${src}">`).join('');
-  box.innerHTML+=`<div class="product">
-${currentUser && currentUser.role==='admin' ? `<button class="delBtn" onclick="deleteProduct(${i})">X</button>`:''}
+products.filter(p=>p.name.toLowerCase().includes(search)).forEach((p,i)=>{
+const imgs=(p.images||[]).map(src=>`<img src="${src}">`).join('');
+box.innerHTML+=`<div class="product">
+${currentUser && currentUser.role==='admin'?`<button class="editBtn" onclick="editProduct(${i})">Edit</button><button class="delBtn" onclick="deleteProduct(${i})">X</button>`:''}
 <div class="gallery">${imgs}</div>
 <h4>${p.name}</h4>
 <p>৳ ${p.price}</p>
+<p>Stock: ${p.stock}</p>
 <small>${p.date}</small>
 </div>`;
 });
 }
 
+// ===== ORDER & SALES =====
 function placeOrder(){
 const name=nameInput('custName');
 const phone=nameInput('custPhone');
 const pay=document.getElementById('payment').value;
 const addr=nameInput('address');
-if(!name||!phone)return alert('Fill customer info');
+if(!name||!phone){alert('Fill customer info');return;}
 orders.push({name,phone,pay,addr,date:new Date().toLocaleString()});
 localStorage.setItem('fv_orders',JSON.stringify(orders));
 renderOrders();
@@ -241,15 +258,16 @@ alert('Order saved');
 
 function renderOrders(){
 const box=document.getElementById('orderHistory');
+const report=document.getElementById('salesReport');
 box.innerHTML='<h4>📦 Order History</h4>';
+let totalRevenue=0;
 orders.forEach(o=>{
-box.innerHTML+=`<div style="border-bottom:1px solid #ddd;padding:6px">
-${o.name} | ${o.phone} | ${o.pay}<br>
-<small>${o.date}</small>
-</div>`;
+box.innerHTML+=`<div style="border-bottom:1px solid #ddd;padding:6px">${o.name} | ${o.phone} | ${o.pay}<br><small>${o.date}</small></div>`;
 });
+report.innerHTML=`<h4>💰 Total Orders: ${orders.length}</h4>`;
 }
 
+// ===== PRINT =====
 function printData(){window.print();}
 </script>
 </body>
