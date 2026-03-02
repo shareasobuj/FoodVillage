@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FoodVillage.com</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial, sans-serif}
+body{background:#f4f6f9}
+header{background:#e63946;color:#fff;padding:15px;text-align:center;font-size:24px;font-weight:bold}
+.container{padding:20px}
+.card{background:#fff;padding:20px;border-radius:12px;box-shadow:0 4px 10px rgba(0,0,0,.08);margin-bottom:20px}
+input,select,button,textarea{width:100%;padding:10px;margin:6px 0;border-radius:8px;border:1px solid #ccc}
+button{background:#e63946;color:#fff;border:none;cursor:pointer;font-weight:bold}
+button:hover{background:#c1121f}
+.flex{display:flex;gap:10px;flex-wrap:wrap}
+.product{border:1px solid #ddd;border-radius:10px;padding:10px;width:200px}
+.product img{width:100%;height:120px;object-fit:cover;border-radius:8px}
+.hidden{display:none}
+nav{background:#222;color:#fff;padding:10px;text-align:center}
+nav button{width:auto;margin:5px}
+@media(max-width:768px){.product{width:100%}}
+</style>
+</head>
+<body>
+<header>🍽️ FoodVillage.com</header>
+
+<!-- LOGIN -->
+<div id="authSection" class="container">
+<div class="card">
+<h3>🔐 Signup / Login</h3>
+<input id="name" placeholder="নাম">
+<input id="email" placeholder="ইমেইল">
+<input id="password" type="password" placeholder="পাসওয়ার্ড">
+<select id="role">
+<option value="customer">Customer</option>
+<option value="admin">Admin</option>
+</select>
+<button onclick="signup()">Signup</button>
+<button onclick="login()">Login</button>
+</div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard" class="hidden">
+<nav>
+<button onclick="showSection('menuSection')">🍔 Menu</button>
+<button onclick="showSection('orderSection')">🛒 Order</button>
+<button onclick="showSection('adminSection')">⚙️ Admin</button>
+<button onclick="printData()">🖨️ Print</button>
+<button onclick="logout()">🚪 Logout</button>
+</nav>
+<div class="container">
+
+<!-- MENU -->
+<div id="menuSection" class="card">
+<h3>📋 Food Menu</h3>
+<div id="productList" class="flex"></div>
+</div>
+
+<!-- ORDER -->
+<div id="orderSection" class="card hidden">
+<h3>💳 Place Order</h3>
+<input id="custName" placeholder="Customer Name">
+<input id="custPhone" placeholder="Phone">
+<select id="payment">
+<option>bKash</option>
+<option>Nagad</option>
+<option>Bank</option>
+</select>
+<textarea id="address" placeholder="Delivery Address"></textarea>
+<button onclick="placeOrder()">✅ Confirm Order</button>
+<div id="orderHistory"></div>
+</div>
+
+<!-- ADMIN -->
+<div id="adminSection" class="card hidden">
+<h3>⚙️ Admin Panel</h3>
+<input id="pname" placeholder="Food Name">
+<input id="pprice" placeholder="Price">
+<input id="pimg" placeholder="Image URL">
+<button onclick="addProduct()">➕ Add Product</button>
+</div>
+
+<!-- LOCATION -->
+<div class="card">
+<h3>📍 Restaurant Location</h3>
+<iframe src="https://maps.google.com/maps?q=Dhaka&t=&z=13&ie=UTF8&iwloc=&output=embed" width="100%" height="250"></iframe>
+</div>
+
+</div>
+</div>
+
+<script>
+// ===== STORAGE =====
+let users = JSON.parse(localStorage.getItem('fv_users')||'[]');
+let products = JSON.parse(localStorage.getItem('fv_products')||'[]');
+let orders = JSON.parse(localStorage.getItem('fv_orders')||'[]');
+let currentUser = null;
+
+// ===== AUTH =====
+function signup(){
+const name=nameInput('name');
+const email=nameInput('email');
+const password=nameInput('password');
+const role=document.getElementById('role').value;
+if(!email||!password)return alert('Fill all');
+users.push({name,email,password,role});
+localStorage.setItem('fv_users',JSON.stringify(users));
+alert('Signup success');
+}
+
+function login(){
+const email=nameInput('email');
+const password=nameInput('password');
+const user=users.find(u=>u.email===email&&u.password===password);
+if(!user)return alert('Login failed');
+currentUser=user;
+document.getElementById('authSection').classList.add('hidden');
+document.getElementById('dashboard').classList.remove('hidden');
+if(user.role!=='admin')document.getElementById('adminSection').style.display='none';
+renderProducts();
+renderOrders();
+}
+
+function logout(){location.reload();}
+
+function nameInput(id){return document.getElementById(id).value.trim();}
+
+// ===== NAV =====
+function showSection(id){
+document.querySelectorAll('#menuSection,#orderSection,#adminSection').forEach(s=>s.classList.add('hidden'));
+document.getElementById(id).classList.remove('hidden');
+}
+
+// ===== PRODUCTS =====
+function addProduct(){
+const name=nameInput('pname');
+const price=nameInput('pprice');
+const img=nameInput('pimg');
+if(!name||!price)return alert('Fill all');
+products.push({name,price,img,date:new Date().toLocaleDateString()});
+localStorage.setItem('fv_products',JSON.stringify(products));
+renderProducts();
+}
+
+function renderProducts(){
+const box=document.getElementById('productList');
+box.innerHTML='';
+products.forEach((p,i)=>{
+box.innerHTML+=`<div class="product">
+<img src="${p.img||'https://via.placeholder.com/200'}">
+<h4>${p.name}</h4>
+<p>৳ ${p.price}</p>
+<small>${p.date}</small>
+</div>`;
+});
+}
+
+// ===== ORDER =====
+function placeOrder(){
+const name=nameInput('custName');
+const phone=nameInput('custPhone');
+const pay=document.getElementById('payment').value;
+const addr=nameInput('address');
+if(!name||!phone)return alert('Fill customer info');
+orders.push({name,phone,pay,addr,date:new Date().toLocaleString()});
+localStorage.setItem('fv_orders',JSON.stringify(orders));
+renderOrders();
+alert('Order saved');
+}
+
+function renderOrders(){
+const box=document.getElementById('orderHistory');
+box.innerHTML='<h4>📦 Order History</h4>';
+orders.forEach(o=>{
+box.innerHTML+=`<div style="border-bottom:1px solid #ddd;padding:6px">
+${o.name} | ${o.phone} | ${o.pay}<br>
+<small>${o.date}</small>
+</div>`;
+});
+}
+
+// ===== PRINT =====
+function printData(){window.print();}
+</script>
+</body>
+</html>
