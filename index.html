@@ -26,8 +26,9 @@ input,select,button,textarea{width:100%;padding:10px;margin:6px 0;border-radius:
 button{background:#e63946;color:#fff;border:none;cursor:pointer;font-weight:bold}
 button:hover{background:#c1121f}
 .flex{display:flex;gap:10px;flex-wrap:wrap}
-.product{border:1px solid #ddd;border-radius:10px;padding:10px;width:200px}
+.product{border:1px solid #ddd;border-radius:10px;padding:10px;width:200px;position:relative}
 .product img{width:100%;height:120px;object-fit:cover;border-radius:8px}
+.delBtn{position:absolute;top:6px;right:6px;background:#000;color:#fff;border:none;padding:4px 6px;border-radius:6px;font-size:12px;cursor:pointer}
 .hidden{display:none}
 nav{background:#222;color:#fff;padding:10px;text-align:center}
 nav button{width:auto;margin:5px}
@@ -110,7 +111,18 @@ nav button{width:auto;margin:5px}
 let users = JSON.parse(localStorage.getItem('fv_users')||'[]');
 let products = JSON.parse(localStorage.getItem('fv_products')||'[]');
 let orders = JSON.parse(localStorage.getItem('fv_orders')||'[]');
-let currentUser = null;
+let currentUser = JSON.parse(localStorage.getItem('fv_currentUser')||'null');
+
+// ===== AUTO LOGIN AFTER REFRESH =====
+window.onload = function(){
+  if(currentUser){
+    document.getElementById('authSection').classList.add('hidden');
+    document.getElementById('dashboard').classList.remove('hidden');
+    if(currentUser.role!=='admin') document.getElementById('adminSection').style.display='none';
+    renderProducts();
+    renderOrders();
+  }
+}
 
 // ===== AUTH =====
 function signup(){
@@ -130,6 +142,7 @@ const password=nameInput('password');
 const user=users.find(u=>u.email===email&&u.password===password);
 if(!user)return alert('Login failed');
 currentUser=user;
+localStorage.setItem('fv_currentUser',JSON.stringify(user));
 document.getElementById('authSection').classList.add('hidden');
 document.getElementById('dashboard').classList.remove('hidden');
 if(user.role!=='admin')document.getElementById('adminSection').style.display='none';
@@ -137,7 +150,11 @@ renderProducts();
 renderOrders();
 }
 
-function logout(){location.reload();}
+function logout(){
+localStorage.removeItem('fv_currentUser');
+location.reload();
+}
+
 function nameInput(id){return document.getElementById(id).value.trim();}
 
 // ===== NAV =====
@@ -167,24 +184,27 @@ const file=document.getElementById('pimg').files[0];
 if(!name||!price||!file){alert('সব তথ্য দিন');return;}
 const reader=new FileReader();
 reader.onload=function(e){
-products.push({
-name,
-price,
-img:e.target.result,
-date:new Date().toLocaleDateString()
-});
+products.push({name,price,img:e.target.result,date:new Date().toLocaleDateString()});
 localStorage.setItem('fv_products',JSON.stringify(products));
 renderProducts();
-alert('✅ Product added with image');
+alert('✅ Product added');
 };
 reader.readAsDataURL(file);
+}
+
+function deleteProduct(index){
+if(!confirm('Delete this product?')) return;
+products.splice(index,1);
+localStorage.setItem('fv_products',JSON.stringify(products));
+renderProducts();
 }
 
 function renderProducts(){
 const box=document.getElementById('productList');
 box.innerHTML='';
-products.forEach(p=>{
+products.forEach((p,i)=>{
 box.innerHTML+=`<div class="product">
+${currentUser && currentUser.role==='admin' ? `<button class="delBtn" onclick="deleteProduct(${i})">X</button>`:''}
 <img src="${p.img||'https://via.placeholder.com/200'}">
 <h4>${p.name}</h4>
 <p>৳ ${p.price}</p>
